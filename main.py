@@ -1,9 +1,12 @@
 import sys
 import ev
 
-from PySide6.QtWidgets import QApplication, QLabel
+import PySide6.QtWidgets as qw
 
-app = QApplication(sys.argv)
-label = QLabel("fully functional calculator fr")
-label.show()
+app = qw.QApplication(sys.argv)
+
+editbox = qw.QTextEdit("fully functional calculator fr")
+editbox.show()
 sys.exit(app.exec())
+
+# nvim --clean -i "./clutter/shada/state" -u "./pnvim.lua"
