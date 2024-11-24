@@ -19,3 +19,6 @@ vim.opt.timeoutlen = 420
 
 -- keep this many lines above and below when scrolling
 vim.opt.scrolloff = 3
+
+-- undo dir in clutter
+vim.opt.undodir = join_paths(dir, "clutter", "undo")

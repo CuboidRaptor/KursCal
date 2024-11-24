@@ -167,3 +167,7 @@ cython_debug/
 
 # goofy nvim stuff
 clutter/
+
+# god help me
+qtermwidget/
+lxqt-build-tools/
