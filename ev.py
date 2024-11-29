@@ -34,3 +34,5 @@ def ev(s: str) -> None:
     gstack.extend(op_stack)
     print(f"op_stack: {format_stack(op_stack)}")
     print(f"gstack: {format_stack(gstack)}")
+
+print(ev("7.5 10 * 25 + 12 5 * 5 + + 0.07 1000 * 50 + +"))

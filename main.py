@@ -1,24 +1,29 @@
-import sys
-from PySide6 import QtCore, QtWidgets
+import subprocess
+import tkinter as tk
+import customtkinter as ctk
 
-class EmbTerminal(QtWidgets.QWidget):
-    def __init__(self, parent=None):
-        super(EmbTerminal, self).__init__(parent)
-        self.process = QtCore.QProcess(self)
-        self.terminal = QtWidgets.QWidget(self)
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.addWidget(self.terminal)
-        # Works also with urxvt:
-        self.process.start(
-            "urxvt", [
-                "-embed", str(int(self.winId())),
-                "-e", "nvim"
-            ]
-        )
-        self.setFixedSize(640, 480)
+ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
+ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    term = EmbTerminal()
-    term.show()
-    sys.exit(app.exec())
+mode = "i"
+
+root = ctk.CTk()
+root.geometry("720x480")
+root.title("KursCal")
+
+vtext = ctk.CTkTextbox(root, width=540, height=440, wrap="none")
+vtext.grid()
+vtext.focus_set()
+
+
+def key_press(event):
+    global mode
+    key = event.char
+    print(key)
+    
+    if mode == "n":
+        return "break"
+
+vtext.bind("<Key>", key_press)
+
+root.mainloop()
