@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 font = ("Consolas", 11)
+tempmark = "temp"
 
 root = tk.Tk()
 root.geometry("720x480")
@@ -47,19 +48,22 @@ def setcursor(cursor):
     global vtext
     vtext.mark_set(tk.INSERT, ".".join([str(i) for i in check_cursor_bounds(cursor)]))
 
+def get_line_end(cursor):
+    vtext.mark_set(tempmark, f"{str(cursor[0])}.end") # set tempmark to line end and read value
+    return int(vtext.index(tempmark).split(".")[1])
+
 def check_cursor_bounds(cursor):
-    vtext.mark_set("temp", f"{str(cursor[0])}.end")
-    curlineend = int(vtext.index("temp").split(".")[1])
-
-    if cursor[1] >= curlineend: # horizontal/right
-        cursor[1] = max(curlineend - 1, 0)
-
     endline = int(vtext.index(tk.END).split(".")[0])
+    print(endline, cursor)
     if cursor[0] >= endline: # vertical/bottom
         cursor[0] = endline - 1
 
-    if cursor[0] <= 1: # vertical/top
+    elif cursor[0] <= 0: # vertical/top
         cursor[0] = 1
+
+    cur_line_end = get_line_end(cursor)
+    if (cursor[1] >= cur_line_end) and (mode == "n"): # horizontal/right
+        cursor[1] = cur_line_end - 1
 
     return cursor
 
@@ -69,7 +73,7 @@ def movecursor(amount):
     cursor[1] += amount[1]
     setcursor(cursor)
 
-def key_press(event):
+def keypress(event):
     global mode
     key = event.keysym
 
@@ -105,6 +109,6 @@ def key_press(event):
         return "break"
 
 if __name__ == "__main__":
-    vtext.bind("<Key>", key_press)
+    vtext.bind("<Key>", keypress)
     vtext.mark_set("temp", "0.0")
     root.mainloop()
