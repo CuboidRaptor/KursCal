@@ -15,11 +15,11 @@ textf.columnconfigure(0, weight=10)
 textf.grid_propagate(False)
 
 vtext = tk.Text(textf, wrap="none", font=font, blockcursor=True)
-vtext.insert("0.0", "skibidi\ntoiler!")
+vtext.insert("0.0", "uh completely normal\ntest text\n")
 vtext.grid(row=0, column=1)
 vtext.focus_set()
 
-ind = ttk.Label(root, text="skibidi", justify="left", anchor="w", font=font)
+ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=font)
 ind.grid(row=1, column=1, sticky="w")
 
 mode = ""
@@ -27,12 +27,12 @@ mode = ""
 def modeset(m):
     global mode, ind, vtext
     if m == "n":
-        ind.configure(text="Normal")
+        ind.configure(text="NORMAL")
         vtext.configure(blockcursor=True)
         vtext.configure(insertbackground="gray")
 
     elif m == "i":
-        ind.configure(text="Insert")
+        ind.configure(text="INSERT")
         vtext.configure(blockcursor=False)
         vtext.configure(insertbackground="black")
 
@@ -105,21 +105,17 @@ def keypress(event):
         elif key == "i":
             modeset("i")
 
-        elif key in set("hjkl"):
-            cursor = getcursor()
-            if key == "h":
-                cursor[1] -= 1
+        elif key == "h":
+            movecursor((0, -1))
 
-            elif key == "j":
-                cursor[0] += 1
+        elif key == "j":
+            movecursor((1, 0))
 
-            elif key == "k":
-                cursor[0] -= 1
+        elif key == "k":
+            movecursor((-1, 0))
 
-            elif key == "l":
-                cursor[1] += 1
-
-            setcursor(cursor)
+        elif key == "l":
+            movecursor((0, 1))
 
         elif key == "dollar":
             cursor = getcursor()
@@ -131,7 +127,7 @@ def keypress(event):
             cursor[1] = 0
             setcursor(cursor)
 
-        return "break"
+        return "break" # tell tk.Text to not handle input
 
 if __name__ == "__main__":
     vtext.bind("<Key>", keypress)
