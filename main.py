@@ -121,6 +121,16 @@ def keypress(event):
 
             setcursor(cursor)
 
+        elif key == "dollar":
+            cursor = getcursor()
+            cursor[1] = get_line_end(cursor)
+            setcursor(cursor)
+
+        elif key in {"underscore", "asciicircum"}:
+            cursor = getcursor()
+            cursor[1] = 0
+            setcursor(cursor)
+
         return "break"
 
 if __name__ == "__main__":
