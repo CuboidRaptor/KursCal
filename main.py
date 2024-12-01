@@ -3,29 +3,33 @@ import tkinter as tk
 from tkinter import ttk
 
 font = ("Consolas", 11)
-tempmark = "temp"
+TEMPMARK = "temp"
+vert_memory = None # allow the cursor to snap back if interrupted while moving only vertically
 
 root = tk.Tk()
 root.geometry("720x480")
 root.title("KursCal")
 
+# frame containing editor
 textf = ttk.Frame(root, width=540, height=440)
 textf.grid(row=0, column=1)
 textf.columnconfigure(0, weight=10)
 textf.grid_propagate(False)
 
+# editor
 vtext = tk.Text(textf, wrap="none", font=font, blockcursor=True)
-vtext.insert("0.0", "uh completely normal\ntest text\n")
+vtext.insert("0.0", "uh completely normal\ntest text\nvery normal fr trust me")
 vtext.grid(row=0, column=1)
 vtext.focus_set()
 
+# info bar at bottom
 ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=font)
 ind.grid(row=1, column=1, sticky="w")
 
 mode = ""
 
 def modeset(m):
-    global mode, ind, vtext
+    global mode
     if m == "n":
         ind.configure(text="NORMAL")
         vtext.configure(blockcursor=True)
@@ -41,16 +45,14 @@ def modeset(m):
 modeset("i")
 
 def getcursor():
-    global vtext
     return [int(i) for i in vtext.index(tk.INSERT).split(".")]
 
 def setcursor(cursor):
-    global vtext
     vtext.mark_set(tk.INSERT, ".".join([str(i) for i in check_cursor_bounds(cursor)]))
 
 def get_line_end(cursor):
-    vtext.mark_set(tempmark, f"{str(cursor[0])}.end") # set tempmark to line end and read value
-    return int(vtext.index(tempmark).split(".")[1])
+    vtext.mark_set(TEMPMARK, f"{str(cursor[0])}.end") # set tempmark to line end and read value
+    return int(vtext.index(TEMPMARK).split(".")[1])
 
 def check_cursor_bounds(cursor):
     endline = int(vtext.index(tk.END).split(".")[0])
@@ -72,32 +74,66 @@ def movecursor(amount):
     cursor[1] += amount[1]
     setcursor(cursor)
 
+def hjkl(d):
+    global vert_memory
+    if d == "Left":
+        movecursor((0, -1))
+        vert_memory = None
+
+    elif d == "Down":
+        if vert_memory is None:
+            vert_memory = getcursor()[1]
+
+        cursor = getcursor()
+        cursor[0] += 1
+        cursor[1] = vert_memory
+        setcursor(cursor)
+
+    elif d == "Up":
+        if vert_memory is None:
+            vert_memory = getcursor()[1]
+
+        cursor = getcursor()
+        cursor[0] -= 1
+        cursor[1] = vert_memory
+        setcursor(cursor)
+
+    elif d == "Right":
+        movecursor((0, 1))
+        vert_memory = None
+
 def keypress(event):
-    global mode
+    global vert_memory
     key = event.keysym
     print(key)
 
     if mode == "i":
+        if key in {"Left", "Down", "Up", "Right"}:
+            hjkl(key)
+            return "break"
+
         if key == "Escape":
             modeset("n")
             movecursor((0, -1))
 
-        elif key in {"Left", "Down", "Up", "Right"}:
-            if key == "Left":
-                movecursor((0, -1))
+        vert_memory = None
 
-            elif key == "Down":
-                movecursor((1, 0))
+    elif mode == "n":
+        if key in set("hjkl"):
+            if key == "h":
+                hjkl("Left")
 
-            elif key == "Up":
-                movecursor((-1, 0))
+            elif key == "j":
+                hjkl("Down")
 
-            elif key == "Right":
-                movecursor((0, 1))
+            elif key == "k":
+                hjkl("Up")
+
+            elif key == "l":
+                hjkl("Right")
 
             return "break"
 
-    elif mode == "n":
         if key == "a":
             modeset("i")
             movecursor((0, 1))
@@ -105,27 +141,17 @@ def keypress(event):
         elif key == "i":
             modeset("i")
 
-        elif key == "h":
-            movecursor((0, -1))
+        elif key in {"underscore", "asciicircum", "Home"}:
+            cursor = getcursor()
+            cursor[1] = 0
+            setcursor(cursor)
 
-        elif key == "j":
-            movecursor((1, 0))
-
-        elif key == "k":
-            movecursor((-1, 0))
-
-        elif key == "l":
-            movecursor((0, 1))
-
-        elif key == "dollar":
+        elif key in {"dollar", "End"}:
             cursor = getcursor()
             cursor[1] = get_line_end(cursor)
             setcursor(cursor)
 
-        elif key in {"underscore", "asciicircum"}:
-            cursor = getcursor()
-            cursor[1] = 0
-            setcursor(cursor)
+        vert_memory = None
 
         return "break" # tell tk.Text to not handle input
 
