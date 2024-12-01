@@ -3,6 +3,5 @@ A Kursed Calculator that uses RPN, a stack for storing answers, and a weird repr
 
 # Dev Stuff
 coded on python 3.12.x, will possibly work on earlier/later versions of python
-install pyside6 through pip
-also have urxvt, nvim installed through system package manager
-I may add windows support if I get bored enough
+have tkinter installed
+should work on all OSes for now, however official support is provided for linux and maybe support is provided for Windows.
