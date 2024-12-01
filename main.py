@@ -5,6 +5,8 @@ from tkinter import ttk
 font = ("Consolas", 11)
 TEMPMARK = "temp"
 vert_memory = None # allow the cursor to snap back if interrupted while moving only vertically
+count = ""
+chars_pressed = []
 
 root = tk.Tk()
 root.geometry("720x480")
@@ -25,6 +27,10 @@ vtext.focus_set()
 # info bar at bottom
 ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=font)
 ind.grid(row=1, column=1, sticky="w")
+
+# chars pressed
+chars = ttk.Label(root, text="", justify="right", anchor="e", font=font)
+chars.grid(row=1, column=1, sticky="e")
 
 mode = ""
 
@@ -74,7 +80,13 @@ def movecursor(amount):
     cursor[1] += amount[1]
     setcursor(cursor)
 
-def hjkl(d):
+keydict = {
+    "h": "Left",
+    "j": "Down",
+    "k": "Up",
+    "l": "Right"
+}
+def arrowmove(d):
     global vert_memory
     if d == "Left":
         movecursor((0, -1))
@@ -102,14 +114,30 @@ def hjkl(d):
         movecursor((0, 1))
         vert_memory = None
 
+chardict = {
+    "underscore": "_",
+    "asciicircum": "^",
+    "Home": "<Home>",
+    "dollar": "$",
+    "End": "<End>"
+}
+allowed = set("aihjkl0123456789") # allowed chars so things like Control_L don't get displayed
+def charset(key):
+    global chars_pressed
+    char = chardict.get(key, key if key in allowed else None)
+    chars_pressed.append(char) if char is not None else ...
+    #chars_pressed = chars_pressed[-10:]
+
+    chars.configure(text="".join(chars_pressed)[-32:])
+
 def keypress(event):
-    global vert_memory
+    global vert_memory, count
     key = event.keysym
     print(key)
 
     if mode == "i":
         if key in {"Left", "Down", "Up", "Right"}:
-            hjkl(key)
+            arrowmove(key)
             return "break"
 
         if key == "Escape":
@@ -119,27 +147,20 @@ def keypress(event):
         vert_memory = None
 
     elif mode == "n":
+        charset(key)
+
         if key in set("hjkl"):
-            if key == "h":
-                hjkl("Left")
-
-            elif key == "j":
-                hjkl("Down")
-
-            elif key == "k":
-                hjkl("Up")
-
-            elif key == "l":
-                hjkl("Right")
-
+            arrowmove(keydict[key])
             return "break"
 
         if key == "a":
             modeset("i")
             movecursor((0, 1))
+            charset("a")
 
         elif key == "i":
             modeset("i")
+            charset("i")
 
         elif key in {"underscore", "asciicircum", "Home"}:
             cursor = getcursor()
@@ -150,6 +171,9 @@ def keypress(event):
             cursor = getcursor()
             cursor[1] = get_line_end(cursor)
             setcursor(cursor)
+
+        elif key in set("0123456789"):
+            count += key
 
         vert_memory = None
 
