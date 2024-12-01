@@ -54,7 +54,6 @@ def get_line_end(cursor):
 
 def check_cursor_bounds(cursor):
     endline = int(vtext.index(tk.END).split(".")[0])
-    print(endline, cursor)
     if cursor[0] >= endline: # vertical/bottom
         cursor[0] = endline - 1
 
@@ -76,11 +75,27 @@ def movecursor(amount):
 def keypress(event):
     global mode
     key = event.keysym
+    print(key)
 
     if mode == "i":
         if key == "Escape":
             modeset("n")
             movecursor((0, -1))
+
+        elif key in {"Left", "Down", "Up", "Right"}:
+            if key == "Left":
+                movecursor((0, -1))
+
+            elif key == "Down":
+                movecursor((1, 0))
+
+            elif key == "Up":
+                movecursor((-1, 0))
+
+            elif key == "Right":
+                movecursor((0, 1))
+
+            return "break"
 
     elif mode == "n":
         if key == "a":
