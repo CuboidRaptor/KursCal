@@ -156,19 +156,15 @@ def keypress(event):
             arrowmove(keydict[key])
             return "break"
 
-        if key in set("123456789"):
+        if (key in set("123456789")) or ((key == "0") and (count != "")):
             count += key
             return "break"
 
-        if key == "0":
+        elif key == "0":
             if count == "":
                 cursor = getcursor()
                 cursor[1] = 0
                 setcursor(cursor)
-
-            else:
-                count += key
-                return "break"
 
         if key == "a":
             modeset("i")
