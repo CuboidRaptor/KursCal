@@ -87,9 +87,10 @@ keydict = {
     "l": "Right"
 }
 def arrowmove(d):
-    global vert_memory
+    global vert_memory, count
+    ct = int(count) if count != "" else 1
     if d == "Left":
-        movecursor((0, -1))
+        movecursor((0, -ct))
         vert_memory = None
 
     elif d == "Down":
@@ -97,7 +98,7 @@ def arrowmove(d):
             vert_memory = getcursor()[1]
 
         cursor = getcursor()
-        cursor[0] += 1
+        cursor[0] += ct
         cursor[1] = vert_memory
         setcursor(cursor)
 
@@ -106,13 +107,15 @@ def arrowmove(d):
             vert_memory = getcursor()[1]
 
         cursor = getcursor()
-        cursor[0] -= 1
+        cursor[0] -= ct
         cursor[1] = vert_memory
         setcursor(cursor)
 
     elif d == "Right":
-        movecursor((0, 1))
+        movecursor((0, ct))
         vert_memory = None
+
+    count = ""
 
 chardict = {
     "underscore": "_",
@@ -153,6 +156,10 @@ def keypress(event):
             arrowmove(keydict[key])
             return "break"
 
+        if key in set("0123456789"):
+            count += key
+            return "break"
+
         if key == "a":
             modeset("i")
             movecursor((0, 1))
@@ -172,10 +179,8 @@ def keypress(event):
             cursor[1] = get_line_end(cursor)
             setcursor(cursor)
 
-        elif key in set("0123456789"):
-            count += key
-
         vert_memory = None
+        count = ""
 
         return "break" # tell tk.Text to not handle input
 
