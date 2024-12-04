@@ -124,7 +124,8 @@ chardict = {
     "dollar": "$",
     "End": "<End>"
 }
-allowed = set("aihjkl0123456789") # allowed chars so things like Control_L don't get displayed
+allowed = set("aihjkl0123456789wbWB") # allowed chars so things like Control_L don't get displayed
+# (if chars are in either allowed or chardict they are allowed to be displayed in the keypress register)
 def charset(key):
     global chars_pressed
     char = chardict.get(key, key if key in allowed else None)
@@ -184,6 +185,38 @@ def keypress(event):
             cursor = getcursor()
             cursor[1] = get_line_end(cursor)
             setcursor(cursor)
+
+        elif key in set("Ww"):
+            # yes I know this isn't consistent with nvim but it's a calculator so idc
+            cursor = getcursor()
+            cursorline = str(cursor[0])
+            line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+            cursorind = cursor[1]
+
+            while line[cursorind] != " ":
+                cursorind += 1
+
+            while line[cursorind] == " ":
+                cursorind += 1
+
+            setcursor((int(cursorline), cursorind))
+
+        elif key in set("Bb"):
+            # yes I know this isn't consistent with nvim but it's a calculator so idc
+            cursor = getcursor()
+            cursorline = str(cursor[0])
+            line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+            cursorind = cursor[1] - 1
+
+            while line[cursorind] == " ":
+                cursorind -= 1
+
+            while line[cursorind] != " ":
+                cursorind -= 1
+
+            cursorind += 1
+
+            setcursor((int(cursorline), cursorind))
 
         vert_memory = None
         count = ""
