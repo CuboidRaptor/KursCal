@@ -22,6 +22,7 @@ textf.grid(row=0, column=1)
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
 vtext.insert("0.0", "uh completely normal\n\ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
 vtext.pack(fill="both", expand=True)
+vtext.see("insert")
 vtext.focus_set()
 
 # info bar at bottom
@@ -55,6 +56,7 @@ def getcursor():
 
 def setcursor(cursor):
     vtext.mark_set("insert", ".".join([str(i) for i in check_cursor_bounds(cursor)]))
+    vtext.see("insert")
 
 def get_line_end(lnum):
     vtext.mark_set(TEMPMARK, f"{str(lnum)}.end") # set tempmark to line end and read value
