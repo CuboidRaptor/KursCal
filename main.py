@@ -14,14 +14,14 @@ root.title("KursCal")
 
 # frame containing editor
 textf = ttk.Frame(root, width=540, height=440)
-textf.columnconfigure(0, weight=10)
-textf.grid_propagate(False)
+## textf.columnconfigure(0, weight=10)
+textf.pack_propagate(False)
 textf.grid(row=0, column=1)
 
 # editor
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
 vtext.insert("0.0", "uh completely normal\n\ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
-vtext.grid(row=0, column=1)
+vtext.pack(fill="both", expand=True)
 vtext.focus_set()
 
 # info bar at bottom
