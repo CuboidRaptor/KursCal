@@ -8,4 +8,4 @@ should work on all OSes for now, however official support is provided for linux 
 
 # NVim Inconsistencies
 `^` and `_` ignore leading whitespace unlike in neovim but idc it's a calculator that like doesn't happen \
-`w` and `W`, and `b` and `B` do the same thing. Yes, I know, yada yada words are not WORDS, but again this is a calculator it's probably fine. 
+`w` and `W`, and `b` and `B` do the same thing. Yes, I know, yada yada words are not WORDS, but again this is a calculator it's probably fine. \(they both use WORDs.\)
