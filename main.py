@@ -20,7 +20,7 @@ textf.grid(row=0, column=1)
 
 # editor
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
-vtext.insert("0.0", "uh completely normal\n\ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
+vtext.insert("0.0", "uh completely normal\n\n \ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
 vtext.pack(fill="both", expand=True)
 vtext.see("insert")
 vtext.focus_set()
@@ -64,6 +64,7 @@ def get_line_end(lnum):
 
 def check_cursor_bounds(cursor):
     endline = int(vtext.index("end").split(".")[0])
+    cursor = list(cursor)
     if cursor[0] >= endline: # vertical/bottom
         cursor[0] = endline - 1
 
@@ -74,7 +75,7 @@ def check_cursor_bounds(cursor):
     if (cursor[1] >= cur_line_end) and (mode == "n"): # horizontal/right
         cursor[1] = cur_line_end - 1
 
-    return cursor
+    return tuple(cursor)
 
 def movecursor(amount):
     cursor = getcursor()
@@ -234,6 +235,10 @@ def keypress(event):
 
                     cursorind = get_line_end(cursorline) - 1
                     line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+
+                    if line == "":
+                        setcursor((cursorline, 0))
+                        return "break"
 
                 elif (line[cursorind] == " "):
                     cursorind -= 1
