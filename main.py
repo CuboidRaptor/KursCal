@@ -2,7 +2,7 @@ import tkinter as tk
 
 from tkinter import ttk
 
-font = ("Consolas", 11)
+FONT = ("Consolas", 11)
 TEMPMARK = "temp"
 vert_memory = None # allow the cursor to snap back if interrupted while moving only vertically
 count = ""
@@ -19,17 +19,17 @@ textf.grid_propagate(False)
 textf.grid(row=0, column=1)
 
 # editor
-vtext = tk.Text(textf, wrap="none", font=font, blockcursor=True)
+vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
 vtext.insert("0.0", "uh completely normal\n\ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
 vtext.grid(row=0, column=1)
 vtext.focus_set()
 
 # info bar at bottom
-ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=font)
+ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=FONT)
 ind.grid(row=1, column=1, sticky="w")
 
 # chars pressed
-chars = ttk.Label(root, text="", justify="right", anchor="e", font=font)
+chars = ttk.Label(root, text="", justify="right", anchor="e", font=FONT)
 chars.grid(row=1, column=1, sticky="e")
 
 mode = ""
