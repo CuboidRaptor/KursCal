@@ -51,17 +51,17 @@ def modeset(m):
 modeset("i")
 
 def getcursor():
-    return [int(i) for i in vtext.index(tk.INSERT).split(".")]
+    return [int(i) for i in vtext.index("insert").split(".")]
 
 def setcursor(cursor):
-    vtext.mark_set(tk.INSERT, ".".join([str(i) for i in check_cursor_bounds(cursor)]))
+    vtext.mark_set("insert", ".".join([str(i) for i in check_cursor_bounds(cursor)]))
 
 def get_line_end(lnum):
     vtext.mark_set(TEMPMARK, f"{str(lnum)}.end") # set tempmark to line end and read value
     return int(vtext.index(TEMPMARK).split(".")[1])
 
 def check_cursor_bounds(cursor):
-    endline = int(vtext.index(tk.END).split(".")[0])
+    endline = int(vtext.index("end").split(".")[0])
     if cursor[0] >= endline: # vertical/bottom
         cursor[0] = endline - 1
 
