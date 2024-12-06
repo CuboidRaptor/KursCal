@@ -14,13 +14,13 @@ root.title("KursCal")
 
 # frame containing editor
 textf = ttk.Frame(root, width=540, height=440)
-textf.grid(row=0, column=1)
 textf.columnconfigure(0, weight=10)
 textf.grid_propagate(False)
+textf.grid(row=0, column=1)
 
 # editor
 vtext = tk.Text(textf, wrap="none", font=font, blockcursor=True)
-vtext.insert("0.0", "uh completely normal\ntest text\nvery normal fr trust me")
+vtext.insert("0.0", "uh completely normal\n\ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
 vtext.grid(row=0, column=1)
 vtext.focus_set()
 
@@ -56,8 +56,8 @@ def getcursor():
 def setcursor(cursor):
     vtext.mark_set(tk.INSERT, ".".join([str(i) for i in check_cursor_bounds(cursor)]))
 
-def get_line_end(cursor):
-    vtext.mark_set(TEMPMARK, f"{str(cursor[0])}.end") # set tempmark to line end and read value
+def get_line_end(lnum):
+    vtext.mark_set(TEMPMARK, f"{str(lnum)}.end") # set tempmark to line end and read value
     return int(vtext.index(TEMPMARK).split(".")[1])
 
 def check_cursor_bounds(cursor):
@@ -68,7 +68,7 @@ def check_cursor_bounds(cursor):
     elif cursor[0] <= 0: # vertical/top
         cursor[0] = 1
 
-    cur_line_end = get_line_end(cursor)
+    cur_line_end = get_line_end(cursor[0])
     if (cursor[1] >= cur_line_end) and (mode == "n"): # horizontal/right
         cursor[1] = cur_line_end - 1
 
@@ -134,6 +134,18 @@ def charset(key):
 
     chars.configure(text="".join(chars_pressed)[-32:])
 
+def inbounds(s, ind):
+    # check s[ind] validity
+    if ind < 0:
+        return "n" # out of bounds left
+
+    try:
+        s[ind]
+        return True
+
+    except IndexError:
+        return "p" # out of bounds right
+
 def keypress(event):
     global vert_memory, count
     key = event.keysym
@@ -183,7 +195,7 @@ def keypress(event):
 
         elif key in {"dollar", "End"}:
             cursor = getcursor()
-            cursor[1] = get_line_end(cursor)
+            cursor[1] = get_line_end(cursor[0])
             setcursor(cursor)
 
         elif key in set("Ww"):
@@ -192,6 +204,8 @@ def keypress(event):
             cursorline = str(cursor[0])
             line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
             cursorind = cursor[1]
+
+
 
             while line[cursorind] != " ":
                 cursorind += 1
@@ -204,19 +218,33 @@ def keypress(event):
         elif key in set("Bb"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
             cursor = getcursor()
-            cursorline = str(cursor[0])
+            cursorline = cursor[0]
             line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
             cursorind = cursor[1] - 1
 
-            while line[cursorind] == " ":
-                cursorind -= 1
+            while True:
+                if cursorind < 0:
+                    cursorline -= 1
 
-            while line[cursorind] != " ":
+                    if cursorline < 1:
+                        setcursor((1, 0))
+                        return "break"
+
+                    cursorind = get_line_end(cursorline) - 1
+                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+
+                elif (line[cursorind] == " "):
+                    cursorind -= 1
+
+                else:
+                    break
+
+            while (cursorind >= 0) and line[cursorind] != " ":
                 cursorind -= 1
 
             cursorind += 1
 
-            setcursor((int(cursorline), cursorind))
+            setcursor((cursorline, cursorind))
 
         vert_memory = None
         count = ""
