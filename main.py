@@ -87,6 +87,10 @@ class Mark:
         self.pair[ind] = val
         self.check_bounds()
 
+    def changevalue(self, ind: int, val: int) -> None:
+        self.pair[ind] += val
+        self.check_bounds()
+
 def getcursor() -> Mark:
     return Mark(vtext.index("insert"))
 
@@ -96,11 +100,8 @@ def setcursor(cursor: Mark) -> None: # set cursor tuple OR mark
 
 def movecursor(amount: tuple[int, int]) -> None:
     cursor = getcursor()
-    print(cursor.pair, amount)
-    cursor.setvalue(0, cursor.pair[0] + amount[0])
-    print(cursor.pair, amount)
-    cursor.setvalue(1, cursor.pair[1] + amount[1])
-    print(cursor.pair, amount)
+    cursor.changevalue(0, amount[0])
+    cursor.changevalue(1, amount[1])
     setcursor(cursor)
 
 def get_line_end(line: int) -> int:
@@ -124,7 +125,7 @@ def arrowmove(d: str):
             vert_memory = getcursor().pair[1]
 
         cursor = getcursor() 
-        cursor.setvalue(0, cursor.pair[0] + ct)
+        cursor.changevalue(0, ct)
         cursor.setvalue(1, vert_memory)
         setcursor(cursor)
 
@@ -133,7 +134,7 @@ def arrowmove(d: str):
             vert_memory = getcursor().pair[1]
 
         cursor = getcursor()
-        cursor.setvalue(0, cursor.pair[0] - ct)
+        cursor.changevalue(0, -ct)
         cursor.setvalue(1, vert_memory)
         setcursor(cursor)
 
@@ -247,7 +248,7 @@ def keypress(event: tk.Event) -> None | str:
                 else:
                     break
 
-            while True: # first conditional otherwise error (I love short-circuiting)
+            while True:
                 if cursorind > (get_line_end(cursorline) - 1):
                     cursorline += 1
 
