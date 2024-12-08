@@ -76,9 +76,12 @@ class Mark:
         elif self.pair[0] <= 0: # vertical/top
             self.pair[0] = 1
 
-        cur_line_end = Mark(self.pair[0], "end", nocheck=True).pair[1] 
+        cur_line_end = Mark(self.pair[0], "end", nocheck=True).pair[1]
         if (self.pair[1] >= cur_line_end) and (mode == "n"): # horizontal/right
             self.pair[1] = cur_line_end - 1
+
+        if self.pair[1] < 0:
+            self.pair[1] = 0
 
     def string(self):
         return ".".join([str(i) for i in self.pair])
@@ -226,11 +229,11 @@ def keypress(event: tk.Event) -> None | str:
             last_line = Mark("end-1c").pair[0]
 
             while True:
-                if cursorind > (get_line_end(cursorline) - 1):
+                if cursorind >= (get_line_end(cursorline)):
                     cursorline += 1
 
                     if cursorline > last_line:
-                        setcursor(Mark("end-1c"))
+                        print(Mark("end-1c").string())
                         return "break"
 
                     cursorind = 0
@@ -249,7 +252,7 @@ def keypress(event: tk.Event) -> None | str:
                     break
 
             while True:
-                if cursorind > (get_line_end(cursorline) - 1):
+                if cursorind > (get_line_end(cursorline)):
                     cursorline += 1
 
                     if cursorline > last_line:
@@ -258,7 +261,7 @@ def keypress(event: tk.Event) -> None | str:
                         return "break"
 
                     cursorind = 0
-                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end-1c")
 
                     if line == "":
                         setcursor(Mark(cursorline, 0))
@@ -287,7 +290,7 @@ def keypress(event: tk.Event) -> None | str:
                         setcursor(Mark(1, 0))
                         return "break"
 
-                    cursorind = get_line_end(cursorline) - 1
+                    cursorind = get_line_end(cursorline)
                     line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
 
                     if line == "":
