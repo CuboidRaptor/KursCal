@@ -4,9 +4,9 @@ from tkinter import ttk
 
 FONT = ("Consolas", 11)
 TEMPMARK = "temp"
-vert_memory = None # allow the cursor to snap back if interrupted while moving only vertically
-count = ""
-chars_pressed = []
+vert_memory: None | int = None # allow the cursor to snap back if interrupted while moving only vertically
+count: str = ""
+chars_pressed: str = ""
 
 root = tk.Tk()
 root.geometry("720x480")
@@ -15,13 +15,14 @@ root.title("KursCal")
 # frame containing editor
 textf = ttk.Frame(root, width=540, height=440)
 ## textf.columnconfigure(0, weight=10)
-textf.pack_propagate(False)
+_ = textf.pack_propagate(False)
 textf.grid(row=0, column=1)
 
 # editor
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
 vtext.insert("0.0", "uh completely normal\n\n \ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
 vtext.pack(fill="both", expand=True)
+vtext.mark_set("insert", "0.0")
 vtext.see("insert")
 vtext.focus_set()
 
@@ -35,53 +36,75 @@ chars.grid(row=1, column=1, sticky="e")
 
 mode = ""
 
-def modeset(m):
+def modeset(m: str):
     global mode
     if m == "n":
-        ind.configure(text="NORMAL")
-        vtext.configure(blockcursor=True)
-        vtext.configure(insertbackground="gray")
+        _ = ind.configure(text="NORMAL")
+        _ = vtext.configure(blockcursor=True)
+        _ = vtext.configure(insertbackground="gray")
 
     elif m == "i":
-        ind.configure(text="INSERT")
-        vtext.configure(blockcursor=False)
-        vtext.configure(insertbackground="black")
+        _ = ind.configure(text="INSERT")
+        _ = vtext.configure(blockcursor=False)
+        _ = vtext.configure(insertbackground="black")
 
     mode = m
 
 modeset("i")
 
-def getcursor():
-    return [int(i) for i in vtext.index("insert").split(".")]
+class Mark:
+    def __init__(self, pos: str | int, pos2: str | int | None=None, nocheck:bool=False):
+        self.pair: list[int]
 
-def setcursor(cursor):
-    vtext.mark_set("insert", ".".join([str(i) for i in check_cursor_bounds(cursor)]))
+        if pos2 is None: # set mark and then read it to resolve things like end, end-1c, etc.
+            vtext.mark_set(TEMPMARK, pos)
+            self.pair = [int(i) for i in vtext.index(TEMPMARK).split(".")]
+
+        else: # also resolve so we can use "end" in list pairs
+            tempstr: str = ".".join([str(i) for i in (pos, pos2)])
+            vtext.mark_set(TEMPMARK, tempstr)
+            self.pair = [int(i) for i in vtext.index(TEMPMARK).split(".")]
+
+        if not nocheck:
+            self.check_bounds()
+
+    def check_bounds(self) -> None:
+        endline = Mark("end", nocheck=True).pair[0] # nocheck=True otherwise the _.end mark gets checked and we start an infintie recursive loop :skull:
+        if self.pair[0] >= endline: # vertical/bottom
+            self.pair[0] = endline - 1
+
+        elif self.pair[0] <= 0: # vertical/top
+            self.pair[0] = 1
+
+        cur_line_end = Mark(self.pair[0], "end", nocheck=True).pair[1] 
+        if (self.pair[1] >= cur_line_end) and (mode == "n"): # horizontal/right
+            self.pair[1] = cur_line_end - 1
+
+    def string(self):
+        return ".".join([str(i) for i in self.pair])
+
+    def setvalue(self, ind: int, val: int) -> None:
+        self.pair[ind] = val
+        self.check_bounds()
+
+def getcursor() -> Mark:
+    return Mark(vtext.index("insert"))
+
+def setcursor(cursor: Mark) -> None: # set cursor tuple OR mark
+    vtext.mark_set("insert", cursor.string())
     vtext.see("insert")
 
-def get_line_end(lnum):
-    vtext.mark_set(TEMPMARK, f"{str(lnum)}.end") # set tempmark to line end and read value
-    return int(vtext.index(TEMPMARK).split(".")[1])
-
-def check_cursor_bounds(cursor):
-    endline = int(vtext.index("end").split(".")[0])
-    cursor = list(cursor)
-    if cursor[0] >= endline: # vertical/bottom
-        cursor[0] = endline - 1
-
-    elif cursor[0] <= 0: # vertical/top
-        cursor[0] = 1
-
-    cur_line_end = get_line_end(cursor[0])
-    if (cursor[1] >= cur_line_end) and (mode == "n"): # horizontal/right
-        cursor[1] = cur_line_end - 1
-
-    return tuple(cursor)
-
-def movecursor(amount):
+def movecursor(amount: tuple[int, int]) -> None:
     cursor = getcursor()
-    cursor[0] += amount[0]
-    cursor[1] += amount[1]
+    print(cursor.pair, amount)
+    cursor.setvalue(0, cursor.pair[0] + amount[0])
+    print(cursor.pair, amount)
+    cursor.setvalue(1, cursor.pair[1] + amount[1])
+    print(cursor.pair, amount)
     setcursor(cursor)
+
+def get_line_end(line: int) -> int:
+    return Mark(line, "end").pair[1]
 
 keydict = {
     "h": "Left",
@@ -89,7 +112,7 @@ keydict = {
     "k": "Up",
     "l": "Right"
 }
-def arrowmove(d):
+def arrowmove(d: str):
     global vert_memory, count
     ct = int(count) if count != "" else 1
     if d == "Left":
@@ -98,20 +121,20 @@ def arrowmove(d):
 
     elif d == "Down":
         if vert_memory is None:
-            vert_memory = getcursor()[1]
+            vert_memory = getcursor().pair[1]
 
-        cursor = getcursor()
-        cursor[0] += ct
-        cursor[1] = vert_memory
+        cursor = getcursor() 
+        cursor.setvalue(0, cursor.pair[0] + ct)
+        cursor.setvalue(1, vert_memory)
         setcursor(cursor)
 
     elif d == "Up":
         if vert_memory is None:
-            vert_memory = getcursor()[1]
+            vert_memory = getcursor().pair[1]
 
         cursor = getcursor()
-        cursor[0] -= ct
-        cursor[1] = vert_memory
+        cursor.setvalue(0, cursor.pair[0] - ct)
+        cursor.setvalue(1, vert_memory)
         setcursor(cursor)
 
     elif d == "Right":
@@ -129,29 +152,21 @@ chardict = {
 }
 allowed = set("aihjkl0123456789wbWB") # allowed chars so things like Control_L don't get displayed
 # (if chars are in either allowed or chardict they are allowed to be displayed in the keypress register)
-def charset(key):
+def charset(key: str) -> None:
     global chars_pressed
-    char = chardict.get(key, key if key in allowed else None)
-    chars_pressed.append(char) if char is not None else ...
-    #chars_pressed = chars_pressed[-10:]
+    char: str | None = chardict.get(key, key if key in allowed else None)
 
-    chars.configure(text="".join(chars_pressed)[-32:])
+    if char is not None:
+        chars_pressed += char
 
-def inbounds(s, ind):
-    # check s[ind] validity
-    if ind < 0:
-        return "n" # out of bounds left
+    else:
+        print(f"char input \"{key}\" blocked")
 
-    try:
-        s[ind]
-        return True
+    _ = chars.configure(text=chars_pressed[-32:])
 
-    except IndexError:
-        return "p" # out of bounds right
-
-def keypress(event):
+def keypress(event: tk.Event) -> None | str:
     global vert_memory, count
-    key = event.keysym
+    key = str(event.keysym)
     print(key)
 
     if mode == "i":
@@ -179,7 +194,7 @@ def keypress(event):
         elif key == "0":
             if count == "":
                 cursor = getcursor()
-                cursor[1] = 0
+                cursor.setvalue(1, 0)
                 setcursor(cursor)
 
         if key == "a":
@@ -193,65 +208,104 @@ def keypress(event):
 
         elif key in {"underscore", "asciicircum", "Home"}:
             cursor = getcursor()
-            cursor[1] = 0
+            cursor.setvalue(1, 0)
             setcursor(cursor)
 
         elif key in {"dollar", "End"}:
             cursor = getcursor()
-            cursor[1] = get_line_end(cursor[0])
+            cursor.setvalue(1, get_line_end(cursor.pair[0]))
             setcursor(cursor)
 
         elif key in set("Ww"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
             cursor = getcursor()
-            cursorline = str(cursor[0])
+            cursorline = cursor.pair[0]
             line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-            cursorind = cursor[1]
+            cursorind = cursor.pair[1]
+            last_line = Mark("end-1c").pair[0]
 
+            while True:
+                if cursorind > (get_line_end(cursorline) - 1):
+                    cursorline += 1
 
+                    if cursorline > last_line:
+                        setcursor(Mark("end-1c"))
+                        return "break"
 
-            while line[cursorind] != " ":
-                cursorind += 1
+                    cursorind = 0
+                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
 
-            while line[cursorind] == " ":
-                cursorind += 1
+                    if line == "":
+                        setcursor(Mark(cursorline, 0))
+                        return "break"
 
-            setcursor((int(cursorline), cursorind))
+                    break
+
+                elif (line[cursorind] != " "): # if line wrap to previous line, don't move left again
+                    cursorind += 1
+
+                else:
+                    break
+
+            while True: # first conditional otherwise error (I love short-circuiting)
+                if cursorind > (get_line_end(cursorline) - 1):
+                    cursorline += 1
+
+                    if cursorline > last_line:
+                        setcursor(Mark("end-1c"))
+
+                        return "break"
+
+                    cursorind = 0
+                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+
+                    if line == "":
+                        setcursor(Mark(cursorline, 0))
+                        return "break"
+
+                elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
+                    cursorind += 1
+
+                else:
+                    break
+
+            setcursor(Mark(cursorline, cursorind))
 
         elif key in set("Bb"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
             cursor = getcursor()
-            cursorline = cursor[0]
+            cursorline = cursor.pair[0]
             line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-            cursorind = cursor[1] - 1
+            cursorind = cursor.pair[1] - 1
 
             while True:
                 if cursorind < 0:
                     cursorline -= 1
 
                     if cursorline < 1:
-                        setcursor((1, 0))
+                        setcursor(Mark(1, 0))
                         return "break"
 
                     cursorind = get_line_end(cursorline) - 1
                     line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
 
                     if line == "":
-                        setcursor((cursorline, 0))
+                        setcursor(Mark(cursorline, 0))
                         return "break"
 
-                elif (line[cursorind] == " "):
+                elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
                     cursorind -= 1
 
                 else:
                     break
 
-            while (cursorind >= 0) and line[cursorind] != " ":
+            while (cursorind >= 0) and line[cursorind] != " ": # first conditional otherwise error (I love short-circuiting)
                 cursorind -= 1
+                # don't line wrap check because characters at the start of the line implies an end to traveling
 
             cursorind += 1
 
-            setcursor((cursorline, cursorind))
+            setcursor(Mark(cursorline, cursorind))
 
         vert_memory = None
         count = ""
@@ -259,6 +313,6 @@ def keypress(event):
         return "break" # tell tk.Text to not handle input
 
 if __name__ == "__main__":
-    vtext.bind("<Key>", keypress)
+    _ = vtext.bind("<Key>", keypress)
     vtext.mark_set("temp", "0.0")
     root.mainloop()
