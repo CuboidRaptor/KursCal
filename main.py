@@ -179,8 +179,8 @@ def keypress(event: tk.Event) -> None | str:
             return "break"
 
         if key == "Escape":
-            modeset("n")
             movecursor((0, -1))
+            modeset("n")
 
         vert_memory = None
 
@@ -204,11 +204,9 @@ def keypress(event: tk.Event) -> None | str:
         if key == "a":
             modeset("i")
             movecursor((0, 1))
-            charset("a")
 
         elif key == "i":
             modeset("i")
-            charset("i")
 
         elif key in {"underscore", "asciicircum", "Home"}:
             cursor = getcursor()
@@ -233,7 +231,7 @@ def keypress(event: tk.Event) -> None | str:
                     cursorline += 1
 
                     if cursorline > last_line:
-                        print(Mark("end-1c").string())
+                        setcursor(Mark("end-1c"))
                         return "break"
 
                     cursorind = 0
