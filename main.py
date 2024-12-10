@@ -220,11 +220,11 @@ def keypress(event: tk.Event) -> None | str:
 
         elif key in set("Ww"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
-            cursor = getcursor()
-            cursorline = cursor.pair[0]
-            line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-            cursorind = cursor.pair[1]
-            last_line = Mark("end-1c").pair[0]
+            cursor: Mark = getcursor()
+            cursorline: int = cursor.pair[0]
+            line: str = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+            cursorind: int = cursor.pair[1]
+            last_line: int = Mark("end-1c").pair[0]
 
             ct = int(count) if count != "" else 1
             for _i in range(0, ct):
@@ -257,7 +257,6 @@ def keypress(event: tk.Event) -> None | str:
                     else:
                         break
 
-                print(fullbreak)
                 if not fullbreak:
                     while True:
                         if cursorind > (get_line_end(cursorline)):
@@ -286,16 +285,16 @@ def keypress(event: tk.Event) -> None | str:
 
         elif key in set("Bb"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
-            cursor = getcursor()
-            cursorline = cursor.pair[0]
-            line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-            cursorind = cursor.pair[1] - 1
+            cursor: Mark = getcursor()
+            cursorline: int = cursor.pair[0]
+            line: str = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+            cursorind: int = cursor.pair[1] - 1
 
             ct = int(count) if count != "" else 1
             for _i in range(0, ct):
-                
                 fullbreak: bool = False
                 cursorind -= 1
+
                 while True:
                     if cursorind < 0:
                         cursorline -= 1
