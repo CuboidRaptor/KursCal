@@ -226,50 +226,61 @@ def keypress(event: tk.Event) -> None | str:
             cursorind = cursor.pair[1]
             last_line = Mark("end-1c").pair[0]
 
-            while True:
-                if cursorind >= (get_line_end(cursorline)):
-                    cursorline += 1
+            ct = int(count) if count != "" else 1
+            for _i in range(0, ct):
+                fullbreak: bool = False
+                line_changed: bool = False
 
-                    if cursorline > last_line:
-                        setcursor(Mark("end-1c"))
-                        return "break"
+                while True:
+                    line_end = get_line_end(cursorline)
+                    if (cursorind > (line_end) or ((cursorind == line_end) and (line == ""))):
+                        cursorline += 1
 
-                    cursorind = 0
-                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+                        if cursorline > last_line:
+                            setcursor(Mark("end-1c"))
+                            count = ""
+                            return "break"
 
-                    if line == "":
-                        setcursor(Mark(cursorline, 0))
-                        return "break"
+                        cursorind = 0
+                        line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
 
-                    break
+                        if line == "":
+                            cursorind = 0
+                            fullbreak = True
+                            break
 
-                elif (line[cursorind] != " "): # if line wrap to previous line, don't move left again
-                    cursorind += 1
+                        line_changed = True
 
-                else:
-                    break
+                    elif (line[cursorind] != " ") and not (line_changed): # if line wrap to previous line, don't move left again
+                        cursorind += 1
 
-            while True:
-                if cursorind > (get_line_end(cursorline)):
-                    cursorline += 1
+                    else:
+                        break
 
-                    if cursorline > last_line:
-                        setcursor(Mark("end-1c"))
+                print(fullbreak)
+                if not fullbreak:
+                    while True:
+                        if cursorind > (get_line_end(cursorline)):
+                            cursorline += 1
 
-                        return "break"
+                            if cursorline > last_line:
+                                setcursor(Mark("end-1c"))
+                                count = ""
+                                return "break"
 
-                    cursorind = 0
-                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end-1c")
+                            cursorind = 0
+                            line = vtext.get(f"{cursorline}.0", f"{cursorline}.end-1c")
 
-                    if line == "":
-                        setcursor(Mark(cursorline, 0))
-                        return "break"
+                            if line == "":
+                                cursorind = 0
+                                fullbreak = True
+                                break
 
-                elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
-                    cursorind += 1
+                        elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
+                            cursorind += 1
 
-                else:
-                    break
+                        else:
+                            break
 
             setcursor(Mark(cursorline, cursorind))
 
@@ -280,32 +291,40 @@ def keypress(event: tk.Event) -> None | str:
             line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
             cursorind = cursor.pair[1] - 1
 
-            while True:
-                if cursorind < 0:
-                    cursorline -= 1
-
-                    if cursorline < 1:
-                        setcursor(Mark(1, 0))
-                        return "break"
-
-                    cursorind = get_line_end(cursorline)
-                    line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-
-                    if line == "":
-                        setcursor(Mark(cursorline, 0))
-                        return "break"
-
-                elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
-                    cursorind -= 1
-
-                else:
-                    break
-
-            while (cursorind >= 0) and line[cursorind] != " ": # first conditional otherwise error (I love short-circuiting)
+            ct = int(count) if count != "" else 1
+            for _i in range(0, ct):
+                
+                fullbreak: bool = False
                 cursorind -= 1
-                # don't line wrap check because characters at the start of the line implies an end to traveling
+                while True:
+                    if cursorind < 0:
+                        cursorline -= 1
 
-            cursorind += 1
+                        if cursorline < 1:
+                            setcursor(Mark(1, 0))
+                            return "break"
+
+                        cursorind = get_line_end(cursorline)
+                        line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+
+                        if line == "":
+                            cursorind = 0
+                            fullbreak = True
+                            break
+
+                    elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
+                        cursorind -= 1
+
+                    else:
+                        break
+
+                if not fullbreak:
+                    while (cursorind >= 0) and line[cursorind] != " ": # first conditional otherwise error (I love short-circuiting)
+                        cursorind -= 1
+                        # don't line wrap check because characters at the start of the line implies an end to traveling
+
+                    cursorind += 1
+
 
             setcursor(Mark(cursorline, cursorind))
 
