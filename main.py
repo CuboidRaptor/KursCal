@@ -251,7 +251,7 @@ def keypress(event: tk.Event) -> None | str:
 
                         line_changed = True
 
-                    elif (line[cursorind] != " ") and not (line_changed): # if line wrap to previous line, don't move left again
+                    elif (line[cursorind] != " ") and not (line_changed):
                         cursorind += 1
 
                     else:
@@ -275,7 +275,7 @@ def keypress(event: tk.Event) -> None | str:
                                 fullbreak = True
                                 break
 
-                        elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
+                        elif (line[cursorind] == " "):
                             cursorind += 1
 
                         else:
