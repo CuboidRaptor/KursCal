@@ -231,7 +231,9 @@ def keypress(event: tk.Event) -> None | str:
                 fullbreak: bool = False
                 line_changed: bool = False
 
+                print("traversing chars...")
                 while True:
+                    print(cursorline, cursorind)
                     line_end = get_line_end(cursorline)
                     if (cursorind > (line_end) or ((cursorind == line_end) and (line == ""))):
                         cursorline += 1
@@ -258,8 +260,11 @@ def keypress(event: tk.Event) -> None | str:
                         break
 
                 if not fullbreak:
+                    print("traversing spaces...")
                     while True:
+                        print(cursorline, cursorind)
                         if cursorind > (get_line_end(cursorline)):
+                            print("passed line end")
                             cursorline += 1
 
                             if cursorline > last_line:
@@ -268,7 +273,7 @@ def keypress(event: tk.Event) -> None | str:
                                 return "break"
 
                             cursorind = 0
-                            line = vtext.get(f"{cursorline}.0", f"{cursorline}.end-1c")
+                            line = vtext.get(f"{cursorline}.0", f"{cursorline}.end")
 
                             if line == "":
                                 cursorind = 0
