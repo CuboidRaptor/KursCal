@@ -1,6 +1,10 @@
 import tkinter as tk
+import ev
+import err
 
 from tkinter import ttk
+from collections import deque
+from decimal import Decimal
 
 FONT = ("Consolas", 11)
 TEMPMARK = "temp"
@@ -14,25 +18,34 @@ root.title("KursCal")
 
 # frame containing editor
 textf = ttk.Frame(root, width=540, height=440)
-## textf.columnconfigure(0, weight=10)
 _ = textf.pack_propagate(False)
-textf.grid(row=0, column=1)
+textf.grid(row=0, column=0)
 
 # editor
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
-vtext.insert("0.0", "uh completely normal\n\n \ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
-vtext.pack(fill="both", expand=True)
-vtext.mark_set("insert", "0.0")
+## vtext.insert("0.0", "uh completely normal\n\n \ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
+vtext.insert("1.0", "1 1 + 3 4 *")
+vtext.mark_set("insert", "1.0")
 vtext.see("insert")
 vtext.focus_set()
+vtext.pack(fill="both", expand=True)
 
 # info bar at bottom
 ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=FONT)
-ind.grid(row=1, column=1, sticky="w")
+ind.grid(row=1, column=0, sticky="w")
 
 # chars pressed
 chars = ttk.Label(root, text="", justify="right", anchor="e", font=FONT)
-chars.grid(row=1, column=1, sticky="e")
+chars.grid(row=1, column=0, sticky="e")
+
+stackf = ttk.Frame(root, width=180, height=20)
+_ = stackf.pack_propagate(False)
+stackf.grid(row=0, column=1, sticky="nsew")
+
+stack_display = tk.Text(stackf, wrap="none", font=FONT)
+## stack_display.insert("0.0", "")
+stack_display.configure(state="disabled")
+stack_display.pack(fill="both", expand=True)
 
 mode = ""
 
@@ -333,7 +346,21 @@ def keypress(event: tk.Event) -> None | str:
 
         return "break" # tell tk.Text to not handle input
 
+def keyreleased(event: tk.Event):
+    if mode == "i":
+        return calc()
+
+def calc():
+    text: str = vtext.get("1.0", "end")
+    data: deque[Decimal] | err.Error = ev.ev(text)
+    if not isinstance(data, err.Error):
+        stack_display.configure(state="normal")
+        stack_display.delete("1.0", "end")
+        stack_display.insert("1.0", ev.format_stack(data))
+        stack_display.configure(state="disabled")
+
 if __name__ == "__main__":
     _ = vtext.bind("<Key>", keypress)
-    vtext.mark_set("temp", "0.0")
+    _ = vtext.bind("<KeyRelease>", keyreleased)
+    vtext.mark_set("temp", "1.0")
     root.mainloop()

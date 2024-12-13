@@ -8,9 +8,9 @@ getcontext().prec = 15
 
 def format_stack(stack: deque[Decimal]) -> str:
     formatted_strings = [format(i, "f") for i in stack]
-    joined = ", ".join(formatted_strings)
+    joined = "\n".join(formatted_strings)
 
-    return f"[{joined}]"
+    return joined
 
 def ev(s: str) -> deque[Decimal] | err.Error:
     stack: deque[Decimal] = deque()
