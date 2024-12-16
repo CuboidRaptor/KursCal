@@ -13,7 +13,7 @@ count: str = ""
 chars_pressed: str = ""
 
 root = tk.Tk()
-root.geometry("720x480")
+root.geometry("864x576")
 root.title("KursCal")
 
 # frame containing editor
@@ -43,9 +43,13 @@ _ = stackf.pack_propagate(False)
 stackf.grid(row=0, column=1, sticky="nsew")
 
 stack_display = tk.Text(stackf, wrap="none", font=FONT)
-## stack_display.insert("0.0", "")
 stack_display.configure(state="disabled")
 stack_display.pack(fill="both", expand=True)
+
+errorbox = ttk.Entry(root, font=FONT)
+errorbox.insert(0, "mogus")
+errorbox.configure(state="disabled")
+errorbox.grid(row=2, column=0, sticky="w")
 
 mode = ""
 
@@ -346,6 +350,12 @@ def keypress(event: tk.Event) -> None | str:
 
         return "break" # tell tk.Text to not handle input
 
+def select_all(event):
+    vtext.tag_add("sel", "1.0", "end-1c")
+    vtext.mark_set("insert", "1.0")
+    vtext.see("insert")
+    return "break"
+
 def keyreleased(event: tk.Event):
     modified = vtext.edit_modified()
     vtext.edit_modified(False)
@@ -365,5 +375,6 @@ def calc():
 if __name__ == "__main__":
     _ = vtext.bind("<Key>", keypress)
     _ = vtext.bind("<<Modified>>", keyreleased)
+    _ = vtext.bind("<Control-Key-a>", select_all)
     vtext.mark_set("temp", "1.0")
     root.mainloop()
