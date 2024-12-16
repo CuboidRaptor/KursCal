@@ -24,7 +24,7 @@ textf.grid(row=0, column=0)
 # editor
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
 ## vtext.insert("0.0", "uh completely normal\n\n \ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
-vtext.insert("1.0", "1 1 + 3 4 *")
+vtext.insert("1.0", "1 1 + 3 4 * **")
 vtext.mark_set("insert", "1.0")
 vtext.see("insert")
 vtext.focus_set()
@@ -347,7 +347,10 @@ def keypress(event: tk.Event) -> None | str:
         return "break" # tell tk.Text to not handle input
 
 def keyreleased(event: tk.Event):
-    if mode == "i":
+    modified = vtext.edit_modified()
+    vtext.edit_modified(False)
+    if (mode == "i") and modified:
+        vtext.edit_modified(False)
         return calc()
 
 def calc():
@@ -361,6 +364,6 @@ def calc():
 
 if __name__ == "__main__":
     _ = vtext.bind("<Key>", keypress)
-    _ = vtext.bind("<KeyRelease>", keyreleased)
+    _ = vtext.bind("<<Modified>>", keyreleased)
     vtext.mark_set("temp", "1.0")
     root.mainloop()
