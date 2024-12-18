@@ -17,9 +17,9 @@ root.geometry("864x576")
 root.title("KursCal")
 
 # frame containing editor
-textf = ttk.Frame(root, width=540, height=440)
+textf = ttk.Frame(root, width=640, height=500)
 _ = textf.pack_propagate(False)
-textf.grid(row=0, column=0)
+textf.grid(row=0, column=0, padx=5, pady=5)
 
 # editor
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True)
@@ -32,24 +32,27 @@ vtext.pack(fill="both", expand=True)
 
 # info bar at bottom
 ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=FONT)
-ind.grid(row=1, column=0, sticky="w")
+ind.grid(row=1, column=0, sticky="w", padx=5, pady=2)
 
 # chars pressed
 chars = ttk.Label(root, text="", justify="right", anchor="e", font=FONT)
-chars.grid(row=1, column=0, sticky="e")
+chars.grid(row=1, column=0, sticky="e", padx=5, pady=2)
 
-stackf = ttk.Frame(root, width=180, height=20)
+# stack frame
+stackf = ttk.Frame(root, width=200, height=20)
 _ = stackf.pack_propagate(False)
-stackf.grid(row=0, column=1, sticky="nsew")
+stackf.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
 
+# display of stack
 stack_display = tk.Text(stackf, wrap="none", font=FONT)
 stack_display.configure(state="disabled")
 stack_display.pack(fill="both", expand=True)
 
+# box for error messages 
 errorbox = ttk.Entry(root, font=FONT)
 errorbox.insert(0, "mogus")
 errorbox.configure(state="disabled")
-errorbox.grid(row=2, column=0, sticky="w")
+errorbox.grid(row=2, column=0, columnspan=2, sticky="we", padx=2, pady=2)
 
 mode = ""
 
