@@ -27,7 +27,7 @@ textf.grid(row=0, column=0, padx=5, pady=5)
 # editor
 vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True, highlightthickness=0)
 ## vtext.insert("0.0", "uh completely normal\n\n \ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
-vtext.insert("1.0", "1 1 + 3 4 * **")
+vtext.insert("1.0", "1 1 + 3 4 * **\n1 +")
 vtext.mark_set("insert", "1.0")
 vtext.see("insert")
 vtext.focus_set()
@@ -117,6 +117,12 @@ class Mark:
     def changevalue(self, ind: int, val: int) -> None:
         self.pair[ind] += val
         self.check_bounds()
+
+def bounds_check() -> None:
+    # like Mark.check_cursor_bounds() but it's always on INSERT
+    insert_pos = Mark(vtext.index("insert"))
+    insert_pos.check_bounds()
+    vtext.mark_set("insert", insert_pos.string())
 
 def getcursor() -> Mark:
     return Mark(vtext.index("insert"))
@@ -308,9 +314,9 @@ def keypress(event: tk.Event) -> None | str:
             setcursor(Mark(cursorline, cursorind))
 
         elif key == "x":
-            insert_pos = Mark(vtext.index("insert"))
-            insert_pos.check_bounds()
-            vtext.delete(insert_pos.string())
+            insert_pos = vtext.index("insert")
+            vtext.delete(insert_pos)
+            bounds_check()
 
         elif key in set("Bb"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
