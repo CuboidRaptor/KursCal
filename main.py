@@ -307,6 +307,11 @@ def keypress(event: tk.Event) -> None | str:
 
             setcursor(Mark(cursorline, cursorind))
 
+        elif key == "x":
+            insert_pos = Mark(vtext.index("insert"))
+            insert_pos.check_bounds()
+            vtext.delete(insert_pos.string())
+
         elif key in set("Bb"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
             cursor: Mark = getcursor()
