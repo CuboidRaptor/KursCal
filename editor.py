@@ -1,5 +1,10 @@
 import tkinter as tk
 import window
+import err
+import ev
+
+from collections import deque
+from decimal import Decimal
 
 TEMPMARK = "temp"
 vert_memory: None | int = None # allow the cursor to snap back if interrupted while moving only vertically
@@ -195,14 +200,6 @@ def keypress(event: tk.Event) -> None | str:
             cursor.setvalue(1, get_line_end(cursor.pair[0]))
             setcursor(cursor)
 
-        elif key == "x":
-            insert_pos = Mark(window.vtext.index("insert"), nocheck=True)
-            line_end = Mark(insert_pos.pair[0], "end", nocheck=True)
-            print(insert_pos.string(), line_end.string())
-            if insert_pos.pair[1] < line_end.pair[1]:
-                window.vtext.delete(insert_pos.string())
-                bounds_check()
-
         elif key in set("Ww"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
             cursor: Mark = getcursor()
@@ -310,8 +307,15 @@ def keypress(event: tk.Event) -> None | str:
 
                     cursorind += 1
 
-
             setcursor(Mark(cursorline, cursorind))
+
+        elif key == "x":
+            insert_pos = Mark(window.vtext.index("insert"), nocheck=True)
+            line_end = Mark(insert_pos.pair[0], "end", nocheck=True)
+            if insert_pos.pair[1] < line_end.pair[1]:
+                window.vtext.delete(insert_pos.string())
+                bounds_check()
+                calc()
 
         vert_memory = None
         count = ""
@@ -322,3 +326,18 @@ def select_all(event):
     window.vtext.tag_add("sel", "1.0", "end-1c")
     window.vtext.mark_set("insert", "1.0")
     return "break"
+
+def calc():
+    text: str = window.vtext.get("1.0", "end")
+    data: deque[Decimal] | err.Error = ev.ev(text)
+    if not isinstance(data, err.Error):
+        window.stack_display.configure(state="normal")
+        window.stack_display.delete("1.0", "end")
+        window.stack_display.insert("1.0", ev.format_stack(data))
+        window.stack_display.configure(state="disabled")
+
+def keyreleased(event: tk.Event):
+    modified = window.vtext.edit_modified()
+    window.vtext.edit_modified(False)
+    if (mode == "i") and modified:
+        return calc()
