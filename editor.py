@@ -341,3 +341,7 @@ def keyreleased(event: tk.Event):
     window.vtext.edit_modified(False)
     if (mode == "i") and modified:
         return calc()
+
+def tab(event: tk.Event):
+    window.vtext.insert("insert", " " * 4)
+    return "break"
