@@ -310,12 +310,15 @@ def keypress(event: tk.Event) -> None | str:
             setcursor(Mark(cursorline, cursorind))
 
         elif key == "x":
-            insert_pos = Mark(window.vtext.index("insert"), nocheck=True)
-            line_end = Mark(insert_pos.pair[0], "end", nocheck=True)
-            if insert_pos.pair[1] < line_end.pair[1]:
-                window.vtext.delete(insert_pos.string())
-                bounds_check()
-                calc()
+            ct = int(count) if count != "" else 1
+            for _i in range(0, ct):
+                insert_pos = Mark(window.vtext.index("insert"), nocheck=True)
+                line_end = Mark(insert_pos.pair[0], "end", nocheck=True)
+                if insert_pos.pair[1] < line_end.pair[1]:
+                    window.vtext.delete(insert_pos.string())
+                    bounds_check()
+
+            calc()
 
         vert_memory = None
         count = ""
