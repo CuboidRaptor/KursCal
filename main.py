@@ -184,7 +184,7 @@ chardict = {
     "dollar": "$",
     "End": "<End>"
 }
-allowed = set("aihjkl0123456789wbWB") # allowed chars so things like Control_L don't get displayed
+allowed = set("aihjkl0123456789wbWBx") # allowed chars so things like Control_L don't get displayed
 # (if chars are in either allowed or chardict they are allowed to be displayed in the keypress register)
 def charset(key: str) -> None:
     global chars_pressed
@@ -247,6 +247,14 @@ def keypress(event: tk.Event) -> None | str:
             cursor = getcursor()
             cursor.setvalue(1, get_line_end(cursor.pair[0]))
             setcursor(cursor)
+
+        elif key == "x":
+            insert_pos = Mark(vtext.index("insert"), nocheck=True)
+            line_end = Mark(insert_pos.pair[0], "end", nocheck=True)
+            print(insert_pos.string(), line_end.string())
+            if insert_pos.pair[1] < line_end.pair[1]:
+                vtext.delete(insert_pos.string())
+                bounds_check()
 
         elif key in set("Ww"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
@@ -313,11 +321,6 @@ def keypress(event: tk.Event) -> None | str:
 
             setcursor(Mark(cursorline, cursorind))
 
-        elif key == "x":
-            insert_pos = vtext.index("insert")
-            vtext.delete(insert_pos)
-            bounds_check()
-
         elif key in set("Bb"):
             # yes I know this isn't consistent with nvim but it's a calculator so idc
             cursor: Mark = getcursor()
@@ -371,14 +374,12 @@ def keypress(event: tk.Event) -> None | str:
 def select_all(event):
     vtext.tag_add("sel", "1.0", "end-1c")
     vtext.mark_set("insert", "1.0")
-    vtext.see("insert")
     return "break"
 
 def keyreleased(event: tk.Event):
     modified = vtext.edit_modified()
     vtext.edit_modified(False)
     if (mode == "i") and modified:
-        vtext.edit_modified(False)
         return calc()
 
 def calc():
