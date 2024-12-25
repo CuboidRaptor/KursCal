@@ -183,7 +183,7 @@ def keypress(event: tk.Event) -> None | str:
                 cursor.setvalue(1, 0)
                 setcursor(cursor)
 
-        if key == "a":
+        elif key == "a":
             modeset("i")
             movecursor((0, 1))
 
