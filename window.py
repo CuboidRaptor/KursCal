@@ -1,8 +1,12 @@
 import tkinter as tk
+import tomllib
 
 from tkinter import ttk
 
-FONT = ("Consolas", 11)
+with open("./config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
+    COLORS = CONFIG["theme"]["colors"]
+    FONT = (CONFIG["theme"]["font"]["font"], CONFIG["theme"]["font"]["fontsize"])
 
 root = tk.Tk()
 root.geometry("864x576")
@@ -17,7 +21,7 @@ _ = textf.pack_propagate(False)
 textf.grid(row=0, column=0, padx=5, pady=5)
 
 # editor
-vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True, highlightthickness=0)
+vtext = tk.Text(textf, wrap="none", font=FONT, blockcursor=True, highlightthickness=0, fg=COLORS["fg"])
 ## vtext.insert("0.0", "uh completely normal\n\n \ne\ntest text \n    very normal fr trust me  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n a  b")
 vtext.insert("1.0", "1 1 + 3 4 * **\n1 +")
 vtext.mark_set("insert", "1.0")
@@ -26,11 +30,11 @@ vtext.focus_set()
 vtext.pack(fill="both", expand=True)
 
 # info bar at bottom
-ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=FONT)
+ind = ttk.Label(root, text="INSERT", justify="left", anchor="w", font=FONT, foreground=COLORS["fg"])
 ind.grid(row=1, column=0, sticky="w", padx=5, pady=2)
 
 # chars pressed
-chars = ttk.Label(root, text="", justify="right", anchor="e", font=FONT)
+chars = ttk.Label(root, text="", justify="right", anchor="e", font=FONT, foreground=COLORS["fg"])
 chars.grid(row=1, column=0, sticky="e", padx=5, pady=2)
 
 # stack frame
@@ -47,5 +51,5 @@ stack_display.pack(fill="both", expand=True)
 errorbox = ttk.Entry(root, font=FONT)
 errorbox.insert(0, "")
 errorbox.configure(state="readonly")
-errorbox.configure(foreground="black")
+errorbox.configure(foreground=COLORS["err"])
 errorbox.grid(row=2, column=0, columnspan=2, sticky="we", padx=2, pady=2)

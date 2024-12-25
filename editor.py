@@ -2,6 +2,7 @@ import tkinter as tk
 import window
 import err
 import ev
+import tomllib
 
 from collections import deque
 from decimal import Decimal
@@ -11,23 +12,21 @@ count = ""
 chars_pressed = ""
 mode = ""
 
-colors = {
-    "highlight_dark": "#888888",
-    "fg": "#000000",
-    "err": "#ff0000"
-}
+with open("./config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
+    COLORS = CONFIG["theme"]["colors"]
 
 def modeset(m: str):
     global mode
     if m == "n":
         _ = window.ind.configure(text="NORMAL")
         _ = window.vtext.configure(blockcursor=True)
-        _ = window.vtext.configure(insertbackground=colors["highlight_dark"])
+        _ = window.vtext.configure(insertbackground=COLORS["highlight_dark"])
 
     elif m == "i":
         _ = window.ind.configure(text="INSERT")
         _ = window.vtext.configure(blockcursor=False)
-        _ = window.vtext.configure(insertbackground=colors["fg"])
+        _ = window.vtext.configure(insertbackground=COLORS["fg"])
 
     mode = m
 
@@ -43,7 +42,7 @@ class Mark:
 
         else: # also resolve so we can use "end" in list pairs
             tempstr = ".".join([str(i) for i in (pos, pos2)])
-            window.vtext.mark_set("temp", tempstr)
+            window.vtext.mark_set("temp", tempstr) 
             self.pair = [int(i) for i in window.vtext.index("temp").split(".")]
 
         if not nocheck:
@@ -343,7 +342,7 @@ def calc():
     data: deque[Decimal] | err.Error = ev.ev(text)
     if not isinstance(data, err.Error):
         # show stack
-        window.stack_display.configure(fg=colors["fg"])
+        window.stack_display.configure(fg=COLORS["fg"])
         window.stack_display.configure(state="normal")
         window.stack_display.delete("1.0", "end")
         window.stack_display.insert("1.0", ev.format_stack(data))
@@ -357,7 +356,7 @@ def calc():
 
     else:
         # red stack to indicate error
-        window.stack_display.configure(fg=colors["err"])
+        window.stack_display.configure(fg=COLORS["err"])
 
         # display error
         window.errorbox.configure(state="normal")
