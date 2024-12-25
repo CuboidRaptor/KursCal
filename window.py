@@ -8,8 +8,8 @@ root = tk.Tk()
 root.geometry("864x576")
 root.title("KursCal")
 
-#style = ttk.Style(root)
-#style.theme_use("clam")
+style = ttk.Style(root)
+style.theme_use("clam")
 
 # frame containing editor
 textf = ttk.Frame(root, width=640, height=500)

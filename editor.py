@@ -6,7 +6,6 @@ import ev
 from collections import deque
 from decimal import Decimal
 
-TEMPMARK = "temp"
 vert_memory: None | int = None # allow the cursor to snap back if interrupted while moving only vertically
 count = ""
 chars_pressed = ""
@@ -39,13 +38,13 @@ class Mark:
         self.pair: list[int]
 
         if pos2 is None: # set mark and then read it to resolve things like end, end-1c, etc.
-            window.vtext.mark_set(TEMPMARK, pos)
-            self.pair = [int(i) for i in window.vtext.index(TEMPMARK).split(".")]
+            window.vtext.mark_set("temp", pos)
+            self.pair = [int(i) for i in window.vtext.index("temp").split(".")]
 
         else: # also resolve so we can use "end" in list pairs
             tempstr = ".".join([str(i) for i in (pos, pos2)])
-            window.vtext.mark_set(TEMPMARK, tempstr)
-            self.pair = [int(i) for i in window.vtext.index(TEMPMARK).split(".")]
+            window.vtext.mark_set("temp", tempstr)
+            self.pair = [int(i) for i in window.vtext.index("temp").split(".")]
 
         if not nocheck:
             self.check_bounds()
@@ -98,12 +97,6 @@ def movecursor(amount: tuple[int, int]) -> None:
 def get_line_end(line: int) -> int:
     return Mark(line, "end").pair[1]
 
-keydict = {
-    "h": "Left",
-    "j": "Down",
-    "k": "Up",
-    "l": "Right"
-}
 def arrowmove(d: str):
     global vert_memory, count
     ct = int(count) if count != "" else 1
@@ -135,22 +128,28 @@ def arrowmove(d: str):
 
     count = ""
 
-chardict = {
+CHARDICT = {
     "underscore": "_",
     "asciicircum": "^",
     "Home": "<Home>",
     "dollar": "$",
     "End": "<End>"
 }
-def charset(key: str) -> None:
-    global chars_pressed
-    char: str | None = chardict.get(key, key)
+def charshow(key: str) -> None:
+    global chars_pressed, CHARDICT
+    char: str | None = CHARDICT.get(key, key)
     chars_pressed += char
 
     _ = window.chars.configure(text=chars_pressed[-32:])
 
+KEYDICT = {
+    "h": "Left",
+    "j": "Down",
+    "k": "Up",
+    "l": "Right"
+}
 def keypress(event: tk.Event) -> None | str:
-    global vert_memory, count
+    global vert_memory, count, mode, KEYDICT
     key = str(event.keysym)
     print(key)
 
@@ -172,9 +171,10 @@ def keypress(event: tk.Event) -> None | str:
 
         else:
             if key in set("hjkl"):
-                arrowmove(keydict[key])
+                arrowmove(KEYDICT[key])
 
             else:
+                # try is wild here but it's for the BreakExc as I'm lazy
                 try:
                     if key == "0":
                         if count == "":
@@ -329,7 +329,7 @@ def keypress(event: tk.Event) -> None | str:
             count = ""
 
         if valid:
-            charset(key)
+            charshow(key)
 
         return "break" # tell tk.Text to not handle input
 
@@ -366,6 +366,7 @@ def calc():
         window.errorbox.configure(state="readonly")
 
 def keyreleased(event: tk.Event):
+    global mode
     modified = window.vtext.edit_modified()
     window.vtext.edit_modified(False)
     if (mode == "i") and modified:

@@ -21,7 +21,7 @@ def prec(stack, *args):
 
 OPS = {
     "sd": (0, lambda stack: stack.clear()),
-    "prec": (1, prec),
+    "prec": (1, prec), # function defined previously because inline doesn't support assignment
     "sqrt": (1, lambda stack, *args: stack.append(args[0].sqrt())),
     "log10": (1, lambda stack, *args: stack.append(args[0].log10())),
     "ln": (1, lambda stack, *args: stack.append(args[0].ln())),
@@ -68,13 +68,11 @@ def ev(s: str) -> deque[Decimal] | err.Error:
             stack.append(Decimal(token))
             continue
 
-        except InvalidOperation:
-            # (from decimal library)
-            pass
+        except InvalidOperation: # (from decimal library)
+            # not a number
+            error = handle(stack, token)
 
-        error = handle(stack, token)
-
-        if error is not None: # error!
-            return error
+            if isinstance(error, err.Error): # error!
+                return error
         
     return stack
