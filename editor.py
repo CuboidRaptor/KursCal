@@ -261,7 +261,7 @@ def keypress(event: tk.Event) -> None | str:
                         cursor: Mark = getcursor()
                         cursorline: int = cursor.pair[0]
                         line: str = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-                        cursorind: int = cursor.pair[1] - 1
+                        cursorind: int = cursor.pair[1]
 
                         ct = int(count) if count != "" else 1
                         for _i in range(0, ct):
