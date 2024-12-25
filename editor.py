@@ -136,7 +136,7 @@ chardict = {
     "dollar": "$",
     "End": "<End>"
 }
-allowed = set("aihjkl0123456789wbWBx") # allowed chars so things like Control_L don't get displayed
+allowed = set("aihjkl0123456789wbWBxe") # allowed chars so things like Control_L don't get displayed
 # (if chars are in either allowed or chardict they are allowed to be displayed in the keypress register)
 def charset(key: str) -> None:
     global chars_pressed
@@ -167,161 +167,169 @@ def keypress(event: tk.Event) -> None | str:
         vert_memory = None
 
     elif mode == "n":
-        charset(key)
-
-        if key in set("hjkl"):
-            arrowmove(keydict[key])
-            return "break"
-
+        valid = True
         if (key in set("123456789")) or ((key == "0") and (count != "")):
-            count += key
-            return "break"
+                count += key
 
-        elif key == "0":
-            if count == "":
-                cursor = getcursor()
-                cursor.setvalue(1, 0)
-                setcursor(cursor)
+        else:
+            if key in set("hjkl"):
+                arrowmove(keydict[key])
 
-        elif key == "a":
-            modeset("i")
-            movecursor((0, 1))
+            else:
+                try:
+                    if key == "0":
+                        if count == "":
+                            cursor = getcursor()
+                            cursor.setvalue(1, 0)
+                            setcursor(cursor)
 
-        elif key == "i":
-            modeset("i")
+                    elif key == "a":
+                        modeset("i")
+                        movecursor((0, 1))
 
-        elif key in {"underscore", "asciicircum", "Home"}:
-            cursor = getcursor()
-            cursor.setvalue(1, 0)
-            setcursor(cursor)
+                    elif key == "i":
+                        modeset("i")
 
-        elif key in {"dollar", "End"}:
-            cursor = getcursor()
-            cursor.setvalue(1, get_line_end(cursor.pair[0]))
-            setcursor(cursor)
+                    elif key in {"underscore", "asciicircum", "Home"}:
+                        cursor = getcursor()
+                        cursor.setvalue(1, 0)
+                        setcursor(cursor)
 
-        elif key in set("Ww"):
-            # yes I know this isn't consistent with nvim but it's a calculator so idc
-            cursor: Mark = getcursor()
-            cursorline: int = cursor.pair[0]
-            line: str = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-            cursorind: int = cursor.pair[1]
-            last_line: int = Mark("end-1c").pair[0]
+                    elif key in {"dollar", "End"}:
+                        cursor = getcursor()
+                        cursor.setvalue(1, get_line_end(cursor.pair[0]))
+                        setcursor(cursor)
 
-            ct = int(count) if count != "" else 1
-            for _i in range(0, ct):
-                fullbreak: bool = False
-                line_changed: bool = False
+                    elif key in set("Ww"):
+                        # yes I know this isn't consistent with nvim but it's a calculator so idc
+                        cursor: Mark = getcursor()
+                        cursorline: int = cursor.pair[0]
+                        line: str = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+                        cursorind: int = cursor.pair[1]
+                        last_line: int = Mark("end-1c").pair[0]
 
-                while True:
-                    line_end = get_line_end(cursorline)
-                    if (cursorind > (line_end) or ((cursorind == line_end) and (line == ""))):
-                        cursorline += 1
+                        ct = int(count) if count != "" else 1
+                        for _i in range(0, ct):
+                            fullbreak: bool = False
+                            line_changed: bool = False
 
-                        if cursorline > last_line:
-                            setcursor(Mark("end-1c"))
-                            count = ""
-                            return "break"
+                            while True:
+                                line_end = get_line_end(cursorline)
+                                if (cursorind > (line_end) or ((cursorind == line_end) and (line == ""))):
+                                    cursorline += 1
 
-                        cursorind = 0
-                        line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+                                    if cursorline > last_line:
+                                        setcursor(Mark("end-1c"))
+                                        raise err.BreakExc()
 
-                        if line == "":
-                            cursorind = 0
-                            fullbreak = True
-                            break
+                                    cursorind = 0
+                                    line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
 
-                        line_changed = True
+                                    if line == "":
+                                        cursorind = 0
+                                        fullbreak = True
+                                        break
 
-                    elif (line[cursorind] != " ") and not (line_changed):
-                        cursorind += 1
+                                    line_changed = True
+
+                                elif (line[cursorind] != " ") and not (line_changed):
+                                    cursorind += 1
+
+                                else:
+                                    break
+
+                            if not fullbreak:
+                                while True:
+                                    if cursorind > (get_line_end(cursorline)):
+                                        cursorline += 1
+
+                                        if cursorline > last_line:
+                                            setcursor(Mark("end-1c"))
+                                            raise err.BreakExc()
+
+                                        cursorind = 0
+                                        line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+
+                                        if line == "":
+                                            cursorind = 0
+                                            fullbreak = True
+                                            break
+
+                                    elif (line[cursorind] == " "):
+                                        cursorind += 1
+
+                                    else:
+                                        break
+
+                        setcursor(Mark(cursorline, cursorind))
+
+                    elif key in set("Bb"):
+                        # yes I know this isn't consistent with nvim but it's a calculator so idc
+                        cursor: Mark = getcursor()
+                        cursorline: int = cursor.pair[0]
+                        line: str = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+                        cursorind: int = cursor.pair[1] - 1
+
+                        ct = int(count) if count != "" else 1
+                        for _i in range(0, ct):
+                            fullbreak: bool = False
+                            cursorind -= 1
+
+                            while True:
+                                if cursorind < 0:
+                                    cursorline -= 1
+
+                                    if cursorline < 1:
+                                        setcursor(Mark(1, 0))
+                                        raise err.BreakExc()
+
+                                    cursorind = get_line_end(cursorline)
+                                    line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+
+                                    if line == "":
+                                        cursorind = 0
+                                        fullbreak = True
+                                        break
+
+                                elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
+                                    cursorind -= 1
+
+                                else:
+                                    break
+
+                            if not fullbreak:
+                                while (cursorind >= 0) and line[cursorind] != " ": # first conditional otherwise error (I love short-circuiting)
+                                    cursorind -= 1
+                                    # don't line wrap check because characters at the start of the line implies an end to traveling
+
+                                cursorind += 1
+
+                        setcursor(Mark(cursorline, cursorind))
+
+                    elif key == "x":
+                        ct = int(count) if count != "" else 1
+                        for _i in range(0, ct):
+                            insert_pos = Mark(window.vtext.index("insert"), nocheck=True)
+                            line_end = Mark(insert_pos.pair[0], "end", nocheck=True)
+                            if insert_pos.pair[1] < line_end.pair[1]:
+                                window.vtext.delete(insert_pos.string())
+                                bounds_check()
+
+                        calc()
 
                     else:
-                        break
+                        # invalid key!!!!
+                        valid = False
 
-                if not fullbreak:
-                    while True:
-                        if cursorind > (get_line_end(cursorline)):
-                            cursorline += 1
+                except err.BreakExc:
+                    pass
 
-                            if cursorline > last_line:
-                                setcursor(Mark("end-1c"))
-                                count = ""
-                                return "break"
+                vert_memory = None
 
-                            cursorind = 0
-                            line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+            count = ""
 
-                            if line == "":
-                                cursorind = 0
-                                fullbreak = True
-                                break
-
-                        elif (line[cursorind] == " "):
-                            cursorind += 1
-
-                        else:
-                            break
-
-            setcursor(Mark(cursorline, cursorind))
-
-        elif key in set("Bb"):
-            # yes I know this isn't consistent with nvim but it's a calculator so idc
-            cursor: Mark = getcursor()
-            cursorline: int = cursor.pair[0]
-            line: str = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-            cursorind: int = cursor.pair[1] - 1
-
-            ct = int(count) if count != "" else 1
-            for _i in range(0, ct):
-                fullbreak: bool = False
-                cursorind -= 1
-
-                while True:
-                    if cursorind < 0:
-                        cursorline -= 1
-
-                        if cursorline < 1:
-                            setcursor(Mark(1, 0))
-                            count = ""
-                            return "break"
-
-                        cursorind = get_line_end(cursorline)
-                        line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-
-                        if line == "":
-                            cursorind = 0
-                            fullbreak = True
-                            break
-
-                    elif (line[cursorind] == " "): # if line wrap to previous line, don't move left again
-                        cursorind -= 1
-
-                    else:
-                        break
-
-                if not fullbreak:
-                    while (cursorind >= 0) and line[cursorind] != " ": # first conditional otherwise error (I love short-circuiting)
-                        cursorind -= 1
-                        # don't line wrap check because characters at the start of the line implies an end to traveling
-
-                    cursorind += 1
-
-            setcursor(Mark(cursorline, cursorind))
-
-        elif key == "x":
-            ct = int(count) if count != "" else 1
-            for _i in range(0, ct):
-                insert_pos = Mark(window.vtext.index("insert"), nocheck=True)
-                line_end = Mark(insert_pos.pair[0], "end", nocheck=True)
-                if insert_pos.pair[1] < line_end.pair[1]:
-                    window.vtext.delete(insert_pos.string())
-                    bounds_check()
-
-            calc()
-
-        vert_memory = None
-        count = ""
+        if valid:
+            charset(key)
 
         return "break" # tell tk.Text to not handle input
 

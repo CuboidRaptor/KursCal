@@ -11,3 +11,6 @@ def err(e: str, msg: str) -> Error:
     _ = sys.stderr.write(f"{error.string}\n")
 
     return error
+
+class BreakExc(Exception):
+    pass
