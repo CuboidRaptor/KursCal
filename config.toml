@@ -6,7 +6,8 @@ font = "Consolas"
 fontsize = 11
 
 [theme.colors]
-fg = "#000004"
-highlight_dark = "#666669"
-highlight_light = "#aaaab2"
+fg = "#fafaff"
+bg = "#000004"
+highlight_dark = "#aaaab2"
+highlight_light = "#666669"
 err = "#ff0006"

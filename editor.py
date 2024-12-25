@@ -351,7 +351,6 @@ def calc():
         # reset errorbox
         window.errorbox.configure(state="normal")
         window.errorbox.delete(0, "end")
-        window.errorbox.insert(0, "")
         window.errorbox.configure(state="readonly")
 
     else:
