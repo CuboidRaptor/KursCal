@@ -8,8 +8,8 @@ from decimal import Decimal
 
 TEMPMARK = "temp"
 vert_memory: None | int = None # allow the cursor to snap back if interrupted while moving only vertically
-count: str = ""
-chars_pressed: str = ""
+count = ""
+chars_pressed = ""
 mode = ""
 
 def modeset(m: str):
@@ -37,7 +37,7 @@ class Mark:
             self.pair = [int(i) for i in window.vtext.index(TEMPMARK).split(".")]
 
         else: # also resolve so we can use "end" in list pairs
-            tempstr: str = ".".join([str(i) for i in (pos, pos2)])
+            tempstr = ".".join([str(i) for i in (pos, pos2)])
             window.vtext.mark_set(TEMPMARK, tempstr)
             self.pair = [int(i) for i in window.vtext.index(TEMPMARK).split(".")]
 
@@ -196,10 +196,10 @@ def keypress(event: tk.Event) -> None | str:
                     elif key in set("Ww"):
                         # yes I know this isn't consistent with nvim but it's a calculator so idc
                         cursor: Mark = getcursor()
-                        cursorline: int = cursor.pair[0]
-                        line: str = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-                        cursorind: int = cursor.pair[1]
-                        last_line: int = Mark("end-1c").pair[0]
+                        cursorline = cursor.pair[0]
+                        line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+                        cursorind = cursor.pair[1]
+                        last_line = Mark("end-1c").pair[0]
 
                         ct = int(count) if count != "" else 1
                         for _i in range(0, ct):
@@ -259,9 +259,9 @@ def keypress(event: tk.Event) -> None | str:
                     elif key in set("Bb"):
                         # yes I know this isn't consistent with nvim but it's a calculator so idc
                         cursor: Mark = getcursor()
-                        cursorline: int = cursor.pair[0]
-                        line: str = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
-                        cursorind: int = cursor.pair[1]
+                        cursorline = cursor.pair[0]
+                        line = window.vtext.get(f"{cursorline}.0", f"{cursorline}.end")
+                        cursorind = cursor.pair[1]
 
                         ct = int(count) if count != "" else 1
                         for _i in range(0, ct):
@@ -333,7 +333,7 @@ def select_all(event):
     return "break"
 
 def calc():
-    text: str = window.vtext.get("1.0", "end")
+    text = window.vtext.get("1.0", "end")
     data: deque[Decimal] | err.Error = ev.ev(text)
     if not isinstance(data, err.Error):
         # show stack
