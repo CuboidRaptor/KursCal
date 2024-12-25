@@ -88,7 +88,7 @@ def ev(s: str) -> deque[Decimal] | err.Error:
 
         error = handle(stack, token)
 
-        if error: # error!
+        if error is not None: # error!
             return error
         
     return stack

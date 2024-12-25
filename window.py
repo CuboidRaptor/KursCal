@@ -45,7 +45,7 @@ stack_display.pack(fill="both", expand=True)
 
 # box for error messages 
 errorbox = ttk.Entry(root, font=FONT)
-errorbox.insert(0, "Test")
+errorbox.insert(0, "")
 errorbox.configure(state="readonly")
 errorbox.configure(foreground="black")
 errorbox.grid(row=2, column=0, columnspan=2, sticky="we", padx=2, pady=2)

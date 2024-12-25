@@ -334,10 +334,30 @@ def calc():
     text: str = window.vtext.get("1.0", "end")
     data: deque[Decimal] | err.Error = ev.ev(text)
     if not isinstance(data, err.Error):
+        # show stack
         window.stack_display.configure(state="normal")
         window.stack_display.delete("1.0", "end")
         window.stack_display.insert("1.0", ev.format_stack(data))
         window.stack_display.configure(state="disabled")
+
+        # reset errorbox
+        window.errorbox.configure(state="normal")
+        window.errorbox.delete(0, "end")
+        window.errorbox.insert(0, "")
+        window.errorbox.configure(state="readonly")
+
+    else:
+        # empty stack
+        window.stack_display.configure(state="normal")
+        window.stack_display.delete("1.0", "end")
+        window.stack_display.insert("1.0", "")
+        window.stack_display.configure(state="disabled")
+
+        # display error
+        window.errorbox.configure(state="normal")
+        window.errorbox.delete(0, "end")
+        window.errorbox.insert(0, data.string)
+        window.errorbox.configure(state="readonly")
 
 def keyreleased(event: tk.Event):
     modified = window.vtext.edit_modified()

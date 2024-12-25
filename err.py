@@ -2,10 +2,12 @@ import sys
 
 class Error:
     def __init__(self, e: str, msg: str):
-        self.e: str = e
-        self.msg: str = msg
+        self.e = e
+        self.msg = msg
+        self.string = f"{e}: {msg}"
 
 def err(e: str, msg: str) -> Error:
-    _ = sys.stderr.write(f"{e}: {msg}\n")
+    error = Error(e, msg)
+    _ = sys.stderr.write(f"{error.string}\n")
 
-    return Error(e, msg)
+    return error
