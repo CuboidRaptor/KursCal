@@ -136,17 +136,10 @@ chardict = {
     "dollar": "$",
     "End": "<End>"
 }
-allowed = set("aihjkl0123456789wbWBxe") # allowed chars so things like Control_L don't get displayed
-# (if chars are in either allowed or chardict they are allowed to be displayed in the keypress register)
 def charset(key: str) -> None:
     global chars_pressed
-    char: str | None = chardict.get(key, key if key in allowed else None)
-
-    if char is not None:
-        chars_pressed += char
-
-    else:
-        print(f"char input \"{key}\" blocked")
+    char: str | None = chardict.get(key, key)
+    chars_pressed += char
 
     _ = window.chars.configure(text=chars_pressed[-32:])
 
@@ -320,6 +313,7 @@ def keypress(event: tk.Event) -> None | str:
                     else:
                         # invalid key!!!!
                         valid = False
+                        print(f"char input \"{key}\" blocked")
 
                 except err.BreakExc:
                     pass
