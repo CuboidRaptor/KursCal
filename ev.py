@@ -30,7 +30,7 @@ OPS = {
     "*": (2, lambda stack, *args: stack.append(args[1] * args[0])),
     "/": (2, lambda stack, *args: stack.append(args[1] / args[0])),
     "**": (2, lambda stack, *args: stack.append(args[1] ** args[0])),
-    "rt": (2, lambda stack, *args: stack.append(args[1] ** (1 / args[0]))),
+    "rt": (2, lambda stack, *args: stack.append(args[0] ** (1 / args[1]))),
     "log": (2, lambda stack, *args: stack.append(args[0].log10() / args[1].log10())),
 }
 
