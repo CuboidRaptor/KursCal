@@ -19,7 +19,7 @@ def prec(stack, *args):
     # man, python anon funcs suck....
     getcontext().prec = math.floor(args[0])
 
-ops = {
+OPS = {
     "sd": (0, lambda stack: stack.clear()),
     "prec": (1, prec),
     "sqrt": (1, lambda stack, *args: stack.append(args[0].sqrt())),
@@ -35,10 +35,11 @@ ops = {
 }
 
 def handle(stack: deque[Decimal], token: str) -> None | err.Error:
+    global OPS
     try:
         pops: list[Decimal] = []
 
-        for i in range(0, ops[token][0]):
+        for i in range(0, OPS[token][0]):
             popped = trypop(stack, token)
 
             if isinstance(popped, err.Error):
@@ -47,7 +48,7 @@ def handle(stack: deque[Decimal], token: str) -> None | err.Error:
             else:
                 pops.append(popped)
 
-        ops[token][1](stack, *pops)
+        OPS[token][1](stack, *pops)
 
     except KeyError:
         return err.err("OperatorError", f"Unknown Operator \"{token}\"")
